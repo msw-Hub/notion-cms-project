@@ -1,0 +1,5 @@
+node_modules
+dist
+
+# shadcn CLI가 생성/관리하는 파일 — 재생성 시 diff 노이즈를 피하기 위해 포맷 대상에서 제외
+src/components/ui

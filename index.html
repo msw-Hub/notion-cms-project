@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React Starter Kit</title>
+    <script>
+      // 다크모드 깜빡임(FOUC) 방지: React가 그리기 전에 저장된 테마를 먼저 적용한다.
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('theme-storage')
+          var theme = stored ? JSON.parse(stored).state.theme : 'system'
+          var isDark =
+            theme === 'dark' ||
+            (theme === 'system' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.classList.toggle('dark', isDark)
+        } catch {
+          // localStorage 접근 불가 환경에서는 기본(라이트) 테마로 둔다.
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
