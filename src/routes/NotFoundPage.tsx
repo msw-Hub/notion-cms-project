@@ -9,7 +9,7 @@ export function NotFoundPage() {
         요청하신 페이지를 찾을 수 없습니다.
       </p>
       <Button asChild>
-        <Link to="/dashboard">대시보드로 이동</Link>
+        <Link to="/">용어 목록으로 이동</Link>
       </Button>
     </div>
   )

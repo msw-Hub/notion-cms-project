@@ -1,10 +1,9 @@
 import { Link, NavLink } from 'react-router'
-import { LayoutDashboard, Package } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { to: '/dashboard', label: '대시보드', icon: LayoutDashboard, end: true },
-  { to: '/products', label: '상품 관리', icon: Package, end: false },
+  { to: '/', label: '용어 목록', icon: BookOpen, end: true },
 ] as const
 
 interface SidebarNavProps {
@@ -45,7 +44,7 @@ export function Sidebar() {
         to="/"
         className="flex h-14 items-center border-b px-4 font-semibold"
       >
-        React Starter Kit
+        DevDict
       </Link>
       <SidebarNav />
     </aside>

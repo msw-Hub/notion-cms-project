@@ -29,7 +29,7 @@ export function Header() {
         <span className="sr-only">메뉴 열기</span>
       </Button>
       <Link to="/" className="font-semibold md:hidden">
-        React Starter Kit
+        DevDict
       </Link>
       <div className="ml-auto">
         <ModeToggle />
@@ -38,7 +38,7 @@ export function Header() {
       <Sheet open={isOpen} onOpenChange={(next) => (next ? open() : close())}>
         <SheetContent side="left" className="w-64 p-0">
           <SheetHeader className="border-b">
-            <SheetTitle>React Starter Kit</SheetTitle>
+            <SheetTitle>DevDict</SheetTitle>
           </SheetHeader>
           <SidebarNav onNavigate={close} />
         </SheetContent>
