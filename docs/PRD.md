@@ -42,17 +42,22 @@
 
 ## 4. Notion 데이터베이스 구조
 
-| 속성명 | 타입 | 설명 |
+| 속성명 (Notion, 영어) | 타입 | 설명 |
 |---|---|---|
-| 용어명 | 제목(Title) | 용어의 대표 이름 (예: 메타프롬프트) |
-| 슬러그 | 텍스트(Rich text) | URL 경로에 쓰는 영문 소문자 식별자 (예: meta-prompt) |
-| 한줄요약 | 텍스트(Rich text) | 목록 카드에 노출할 1~2문장 요약 |
-| 카테고리 | 선택(Select) | 단일 대분류 (예: 프롬프트, 기획/문서, 개발방법론, 아키텍처) |
-| 태그 | 다중 선택(Multi-select) | 교차 주제 키워드 (예: AI, 협업, 문서화) |
-| 난이도 | 선택(Select) | 입문 / 중급 / 심화 |
-| 공개여부 | 체크박스(Checkbox) | 체크된 항목만 사이트에 노출 (초안 숨김용) |
-| 최종수정일 | 최종 편집 일시(Last edited time) | 상세 페이지의 "마지막 업데이트" 표시 |
-| 관련용어 | 관계형(Relation) | 같은 데이터베이스를 가리키는 자기 참조 관계 (상세 페이지 하단 "관련 용어" 링크에 사용) |
+| `Name` | 제목(Title) | 용어의 대표 이름 (예: 메타프롬프트) |
+| `Slug` | 텍스트(Rich text) | URL 경로에 쓰는 영문 소문자 식별자 (예: meta-prompt) |
+| `Summary` | 텍스트(Rich text) | 목록 카드에 노출할 1~2문장 요약 |
+| `Category` | 선택(Select) | 단일 대분류, 옵션 값은 한국어 (예: 프롬프트, 기획/문서, 개발방법론, 아키텍처) |
+| `Tags` | 다중 선택(Multi-select) | 교차 주제 키워드, 옵션 값은 한국어 (예: AI, 협업, 문서화) |
+| `Difficulty` | 선택(Select) | 옵션 값은 한국어 3단계 고정 — 입문 / 중급 / 심화 |
+| `Published` | 체크박스(Checkbox) | 체크된 항목만 사이트에 노출 (초안 숨김용) |
+| `Updated At` | 최종 편집 일시(Last edited time) | 상세 페이지의 "마지막 업데이트" 표시 |
+| `Related Terms` | 관계형(Relation) | 같은 데이터베이스를 가리키는 자기 참조 관계, `single_property`(단방향) (상세 페이지 하단 "관련 용어" 링크에 사용) |
+
+속성 **이름**은 영어로 통일한다(코드가 `properties['Slug']`처럼 이름 문자열로 속성을 찾으므로 오타·공백에
+안전하고 TypeScript 필드명과 1:1로 대응된다). 반면 Select/Multi-select **옵션 값**(카테고리·태그 목록,
+난이도 3단계)은 사용자에게 노출되는 콘텐츠이므로 한국어로 유지한다. 실제 옵션 값 시드와 `Related Terms`의
+Notion UI 설정 절차는 `docs/notion-schema.md`를 따른다.
 
 용어 본문은 별도 속성이 아니라 각 Notion 페이지의 본문 블록(문단, 제목, 목록, 코드, 인용, 이미지)으로
 작성하며, 상세 화면에서 이를 렌더링한다.
@@ -104,7 +109,7 @@ Notion API의 `page_size`는 최대 100건이므로, 프록시는 `has_more`/`ne
 
 1. Notion 데이터베이스 스키마 확정 및 샘플 용어 5~10건 입력, Notion 통합 생성·DB 공유
    (읽기 전용 capability로 제한). `GET /v1/databases/{database_id}`로 `data_sources[0].id`를
-   확보하고, 토큰 보관 방식(프록시 경유)과 환경변수(`NOTION_TOKEN`, `NOTION_DATA_SOURCE_ID`)를
+   확보하고, 토큰 보관 방식(프록시 경유)과 환경변수(`NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID`)를
    정의한다 (`.env.example`에 추가, `VITE_` 접두사로 토큰을 노출하지 않을 것). 모든 Notion API
    요청에는 `Notion-Version: 2026-03-11` 헤더를 고정한다.
 2. 타입 및 데이터 계층 구현 — `src/features/terms/api/terms.ts`에 `termKeys` 쿼리 키 팩토리와

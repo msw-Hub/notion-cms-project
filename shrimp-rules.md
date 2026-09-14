@@ -58,8 +58,14 @@
 - `Notion-Version` 헤더 값(`2026-03-11`)은 PRD가 지정한 값이다. `@notionhq/client` 기본값과
   다르다는 이유로 임의로 SDK 기본값에 맞추지 않는다.
 
+### 속성 이름 표기 규칙
+- Notion 데이터베이스 **속성 이름은 영어**(`Name`/`Slug`/`Category`/`Difficulty`/`Published` 등,
+  `docs/notion-schema.md` 매핑표 기준)로, **Select/Multi-select 옵션 값과 Difficulty 3개 값은 한국어**로
+  유지한다. `notionMapper.ts`(Task 010)에서 `properties['Slug']`처럼 영문 키로 접근하며,
+  `docs/notion-schema.md`의 매핑표가 유일한 근거다 — 임의로 다른 영문 이름을 쓰지 않는다.
+
 ### 토큰/환경변수
-- `NOTION_TOKEN`, `NOTION_DATA_SOURCE_ID`는 **절대** `VITE_` 접두사를 붙이지 않는다. 붙이면
+- `NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID`는 **절대** `VITE_` 접두사를 붙이지 않는다. 붙이면
   Vite가 클라이언트 번들에 그대로 노출한다. 새 환경변수를 추가할 때도 브라우저에 노출돼도 되는
   값인지 먼저 판단한 뒤 접두사 여부를 정한다.
 - `.env.example`에 새 환경변수를 추가하면 `docs/PRD.md` 7장(구현 단계 1) 서술도 함께 갱신한다.
@@ -110,7 +116,7 @@
 ## 8. 금지 행동
 
 - `response.data.data`를 `apiClient` 인터셉터 통과 후 다시 꺼내는 코드 작성 금지.
-- `NOTION_TOKEN`/`NOTION_DATA_SOURCE_ID`에 `VITE_` 접두사 부여 금지.
+- `NOTION_API_KEY`/`NOTION_DATA_SOURCE_ID`에 `VITE_` 접두사 부여 금지.
 - `src/**`(클라이언트 번들)에서 `@notionhq/client` import 금지.
 - `vite.config.ts`의 Notion 프록시 화이트리스트를 우회하거나 범위를 넓히는 임의 경로 추가 금지
   (PRD가 허용한 2개 엔드포인트 외 추가 시 PRD/로드맵 갱신을 함께 진행).
