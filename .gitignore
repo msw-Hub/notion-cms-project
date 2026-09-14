@@ -33,3 +33,6 @@ dist-ssr
 
 # Claude Code 개인 로컬 설정(팀 공유 설정은 .claude/settings.json)
 .claude/settings.local.json
+
+# Shrimp Task Manager 로컬 태스크 데이터(자체 .git 보유, 사용자별 런타임 상태)
+shrimp_data/
