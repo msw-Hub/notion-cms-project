@@ -1,4 +1,6 @@
 import { PageHeader } from '@/components/common/PageHeader'
+import { EmptyState } from '@/components/common/EmptyState'
+import { ErrorState } from '@/components/common/ErrorState'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -7,11 +9,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
+import { useTerms } from '@/features/terms/hooks/useTerms'
+import { TermCard } from '@/features/terms/components/TermCard'
+import { TermCardGrid } from '@/features/terms/components/TermCardGrid'
+import { TermCardSkeleton } from '@/features/terms/components/TermCardSkeleton'
 
-// 용어 목록 화면 — 검색·필터 입력과 카드 그리드 레이아웃 뼈대만 구성한다.
-// 실제 Notion 데이터 조회·검색·필터 동작은 src/features/terms/ 구현(PRD 7장 2~3단계) 이후 연결한다.
+// 용어 목록 화면 — 조회한 공개 용어를 카드 그리드로 보여준다.
+// 검색·필터 입력(위 Input/Select 3종)은 아직 상태·동작이 없어 disabled로 표시만 해둔다
+// (Task 006에서 useTermFilters/TermFilterBar로 교체 예정).
 export function HomePage() {
+  const { data: terms, isPending, isError, error } = useTerms()
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -53,13 +61,31 @@ export function HomePage() {
         </Select>
       </div>
 
-      {/* 목록 표시 자리 — 실제 연동 후 로딩 중에는 아래와 같은 스켈레톤 카드를,
-          결과 0건일 때는 EmptyState(@/components/common/EmptyState)를 렌더링한다. */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <Skeleton key={index} className="h-40 rounded-lg" />
-        ))}
-      </div>
+      {isPending && (
+        <TermCardGrid>
+          {/* 데이터 정체성이 없는 순수 플레이스홀더라 인덱스 key를 예외적으로 허용한다 */}
+          {Array.from({ length: 6 }).map((_, index) => (
+            <TermCardSkeleton key={index} />
+          ))}
+        </TermCardGrid>
+      )}
+
+      {isError && <ErrorState error={error} />}
+
+      {!isPending && !isError && terms.length === 0 && (
+        <EmptyState
+          title="등록된 용어가 없습니다"
+          description="Notion에 공개된 용어가 추가되면 여기에 표시됩니다."
+        />
+      )}
+
+      {!isPending && !isError && terms.length > 0 && (
+        <TermCardGrid>
+          {terms.map((term) => (
+            <TermCard key={term.pageId} term={term} />
+          ))}
+        </TermCardGrid>
+      )}
     </div>
   )
 }
