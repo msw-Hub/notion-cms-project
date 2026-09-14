@@ -55,7 +55,7 @@ DevDict(개발 용어/개념 사전)는 Notion을 CMS로 쓰는 읽기 전용 �
   않으므로 별도 서버리스 프록시 구현이 필요하다 (PRD 3장).
 - 공개여부(비공개 초안) 필터는 반드시 프록시 측에서 Notion query filter로 적용한다. 카테고리·난이도·태그·
   키워드 필터는 공개 용어 전체를 받아온 뒤 클라이언트 사이드에서 수행한다 (PRD 6장).
-- `NOTION_TOKEN`/`NOTION_DATA_SOURCE_ID`는 `VITE_` 접두사를 붙이지 않는다 (`.env.example` 참고) —
+- `NOTION_API_KEY`/`NOTION_DATA_SOURCE_ID`는 `VITE_` 접두사를 붙이지 않는다 (`.env.example` 참고) —
   붙이면 토큰이 클라이언트 번들에 그대로 노출된다.
 
 ### 테마 (다크모드)
@@ -83,5 +83,5 @@ baseColor `neutral`, iconLibrary `lucide`). 이 폴더는 `react-refresh/only-ex
 
 ## 환경 변수
 
-`.env.example` 참고. `VITE_API_BASE_URL`(백엔드 API 베이스 URL) 외에 Notion 연동용 `NOTION_TOKEN`,
+`.env.example` 참고. `VITE_API_BASE_URL`(백엔드 API 베이스 URL) 외에 Notion 연동용 `NOTION_API_KEY`,
 `NOTION_DATA_SOURCE_ID`(서버/프록시 측 전용, `VITE_` 접두사 없음)가 필요하다. 실제 값은 `.env.local`에 채운다.

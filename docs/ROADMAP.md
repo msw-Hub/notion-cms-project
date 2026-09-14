@@ -34,10 +34,10 @@ DevDict는 개발 용어·개념의 정의를 찾는 누구나(그리고 이를 
 - **데이터 계층 기반**: `src/lib/apiClient.ts`(`CommonResponse` 언래핑 + `ProblemDetail` → `ApiError`),
   `src/lib/errorMessages.ts`, `src/lib/queryClient.ts`(4xx 재시도 안 함), `src/lib/isApiError.ts`,
   `src/mocks/mockApi.ts`(`delay`/`delayError`), `src/hooks/useDebounce.ts`
-- **Notion dev 프록시**: `vite.config.ts`의 `/notion-proxy`가 `loadEnv`로 읽은 `NOTION_TOKEN`과
+- **Notion dev 프록시**: `vite.config.ts`의 `/notion-proxy`가 `loadEnv`로 읽은 `NOTION_API_KEY`와
   `Notion-Version: 2026-03-11`을 주입하고, data source query(POST)와 block children(GET)만
   화이트리스트로 허용
-- **환경변수 템플릿**: `.env.example`에 `VITE_API_BASE_URL`, `NOTION_TOKEN`, `NOTION_DATA_SOURCE_ID`
+- **환경변수 템플릿**: `.env.example`에 `VITE_API_BASE_URL`, `NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID`
 - **실행 검증 완료(직전 로드맵 작성 시점)**: `npm run dev` 후 `/`, `/terms/meta-prompt`,
   `/no-such-page` 모두 콘솔 에러 0건으로 렌더링되며, 390px 폭에서 사이드바가 숨고 "메뉴 열기"
   버튼이 노출되는 것까지 Playwright로 확인
@@ -70,10 +70,10 @@ Notion 블록 렌더러, 실제 검색·필터 동작, 프로덕션용 서버리
   - [ ] `TermBlock`을 실제 Notion 블록 스키마에 맞춰 구체화 (현재 `unknown` — Task 008에서 처리)
 
 - **Task 003: Notion dev 프록시 및 환경변수 템플릿 구성** ✅ - 완료
-  - [x] `vite.config.ts`에 `/notion-proxy` dev 프록시 추가, `loadEnv`로 `NOTION_TOKEN` 주입
+  - [x] `vite.config.ts`에 `/notion-proxy` dev 프록시 추가, `loadEnv`로 `NOTION_API_KEY` 주입
   - [x] `Notion-Version: 2026-03-11` 헤더 고정
   - [x] data source query / block children 두 경로만 통과시키는 화이트리스트 검사
-  - [x] `.env.example`에 `NOTION_TOKEN`, `NOTION_DATA_SOURCE_ID` 추가 (`VITE_` 접두사 미사용)
+  - [x] `.env.example`에 `NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID` 추가 (`VITE_` 접두사 미사용)
 
 ---
 
@@ -164,7 +164,7 @@ Notion 블록 렌더러, 실제 검색·필터 동작, 프로덕션용 서버리
   - [ ] 샘플 용어 5~10건 입력 (비공개 초안 1건 포함해 공개여부 필터 검증용 데이터 확보)
   - [ ] Notion 통합 생성 후 읽기 전용 capability로 제한, 해당 데이터베이스 공유
   - [ ] `GET /v1/databases/{database_id}`로 `data_sources[0].id` 확보
-  - [ ] `.env.local`에 `NOTION_TOKEN`, `NOTION_DATA_SOURCE_ID` 기입 (`.gitignore` 적용 여부 확인)
+  - [ ] `.env.local`에 `NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID` 기입 (`.gitignore` 적용 여부 확인)
   - [ ] 실행 검증: dev 서버 기동 후 `/notion-proxy/v1/data_sources/{id}/query`에 브라우저/HTTP 클라이언트로
         요청해 200과 실제 페이지 목록이 오는지 확인, 화이트리스트 밖 경로는 차단되는지 확인
 
@@ -236,7 +236,7 @@ Notion 블록 렌더러, 실제 검색·필터 동작, 프로덕션용 서버리
 
 - **Task 015: 프로덕션 서버리스 프록시 구현**
   - [ ] 배포 대상 플랫폼의 서버리스 함수로 프록시 구현 (dev 프록시와 동일한 화이트리스트 2개 엔드포인트)
-  - [ ] `NOTION_TOKEN`/`NOTION_DATA_SOURCE_ID`를 플랫폼 환경변수로 주입, 클라이언트 번들 비노출 확인
+  - [ ] `NOTION_API_KEY`/`NOTION_DATA_SOURCE_ID`를 플랫폼 환경변수로 주입, 클라이언트 번들 비노출 확인
   - [ ] 429 응답 시 `Retry-After` 기반 재시도 구현
   - [ ] 60초 수준의 인메모리/CDN 캐시로 분당 180회(3 req/s) 한도 대응
   - [ ] 프런트엔드가 dev/프로덕션 모두 동일한 자체 엔드포인트 경로를 쓰도록 정리

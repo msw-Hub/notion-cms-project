@@ -6,7 +6,7 @@ import { defineConfig, loadEnv } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  // NOTE: NOTION_TOKEN 등 서버 전용 환경변수는 VITE_ 접두사가 없어 import.meta.env로 노출되지
+  // NOTE: NOTION_API_KEY 등 서버 전용 환경변수는 VITE_ 접두사가 없어 import.meta.env로 노출되지
   // 않는다(의도적 — 토큰을 클라이언트 번들에 노출하지 않기 위함). 이 설정 파일(Node 컨텍스트)에서
   // 직접 쓰기 위해 loadEnv로 접두사 제한 없이 읽어온다.
   const env = loadEnv(mode, process.cwd(), '')
@@ -53,7 +53,7 @@ export default defineConfig(({ mode }) => {
                 return
               }
 
-              proxyReq.setHeader('Authorization', `Bearer ${env.NOTION_TOKEN}`)
+              proxyReq.setHeader('Authorization', `Bearer ${env.NOTION_API_KEY}`)
               // @notionhq/client의 기본 Notion-Version(2025-09-03)보다 최신인 PRD 지정 버전을
               // 명시적으로 고정한다. notionVersion 옵션으로 얼마든지 오버라이드 가능하므로
               // SDK 기본값과 다른 것은 문제가 아니다.
