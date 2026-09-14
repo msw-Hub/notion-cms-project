@@ -1,6 +1,6 @@
 # DevDict 로드맵
 
-_기준: `docs/PRD.md`, 코드베이스 커밋 `18d0e65` 시점_
+_기준: `docs/PRD.md`, 코드베이스 커밋 `d5db24d` 시점_
 
 ## 개요
 
@@ -17,34 +17,47 @@ DevDict는 개발 용어·개념의 정의를 찾는 누구나(그리고 이를 
 
 ## 현재 상태
 
-범용 React/Vite 스타터킷에서 데모(products/dashboard)를 제거하고 DevDict 골격까지 구성된 상태입니다.
-코드베이스 실사 기준으로 **이미 있는 것**은 다음과 같습니다.
+Phase 1(골격 구축)에 이어 Phase 2(공통 모듈/컴포넌트 개발)의 Task 004~006까지 완료되어, `/` 목록
+화면이 목 데이터를 기반으로 실제로 동작합니다(카드 렌더링 + 검색·필터). 코드베이스 실사 기준으로
+**이미 있는 것**은 다음과 같습니다.
 
 - **라우트 골격**: `src/routes/router.tsx`에 `/`(HomePage), `/terms/:slug`(TermDetailPage),
   `*`(NotFoundPage)가 pathless layout route(`AppLayout`) 아래에 정의되어 있고, loader/action은
   의도적으로 미사용
 - **레이아웃/공통 컴포넌트**: `AppLayout`, `Header`(모바일 Sheet 트리거 + `ModeToggle`),
   `Sidebar`(DevDict 브랜드 + "용어 목록" 내비), `PageHeader`, `EmptyState`, `ErrorState`
-- **화면 뼈대**: `HomePage`는 disabled 상태의 검색 Input + 카테고리/난이도/태그 Select와 스켈레톤
-  카드 6개만 렌더링, `TermDetailPage`는 슬러그를 제목에 노출하고 배지·본문·관련 용어 자리를
-  플레이스홀더 텍스트로 표시
+- **목 데이터 및 조회 함수 (Task 004)**: `src/mocks/db.ts`에 `docs/notion-schema.md` §8 샘플
+  설계를 그대로 반영한 공개 용어 8건(`mockTerms`)과 슬러그별 본문 블록(`mockBlocks`, 메타프롬프트는
+  문단/H2/H3/글머리목록/번호목록/코드/인용/이미지 8종을 모두 포함한 "블록 샘플러") 시드. 비공개
+  용어(RAG)는 목록에서 제외하되 메타프롬프트의 관련 용어로만 남겨 "맵에 없는 ID" 케이스를 재현.
+  `src/features/terms/api/terms.ts`의 `fetchTerms`/`fetchTermBySlug`/`buildTermMap` 구현 완료
+- **용어 목록 조회 및 카드 UI (Task 005)**: `src/features/terms/hooks/useTerms.ts`(파라미터 없이
+  `termKeys.lists()`만 쿼리 키로 사용 — 필터가 바뀌어도 재요청이 일어나지 않도록 설계, 아래 Task 005
+  항목 참고), `TermCard`/`TermCardGrid`/`TermCardSkeleton` 컴포넌트. `HomePage`에 로딩(스켈레톤)/
+  에러(`ErrorState`)/빈 상태(`EmptyState`)/카드 그리드 분기 연결
+- **검색·필터 (Task 006)**: `useTermFilters`(`useDebounce` 재사용, 키워드만 300ms 디바운스),
+  `filterTerms`/`useFilteredTerms`(카테고리·난이도·태그·키워드를 클라이언트 사이드로 필터링),
+  `TermFilterBar`로 `HomePage`의 disabled 플레이스홀더를 실제 동작하는 컨트롤로 교체. 카테고리·태그
+  옵션은 조회 데이터에서 파생, 난이도는 고정 유니온이라 하드코딩. "등록된 용어가 없습니다"(원본
+  0건)와 "검색 결과가 없습니다"(필터링 후 0건)를 구분한 빈 상태 처리
+- **화면 뼈대**: `TermDetailPage`는 아직 슬러그를 제목에 노출하고 배지·본문·관련 용어 자리를
+  플레이스홀더 텍스트로 표시(Task 007 예정)
 - **도메인 타입**: `src/features/terms/types.ts`에 `TermDifficulty`, `Term`, `TermListParams`,
-  `TermDetail` 정의 완료. 단 `TermBlock`은 `unknown` 플레이스홀더
+  `TermDetail` 정의 완료. 단 `TermBlock`은 `unknown` 플레이스홀더(Task 008에서 구체화 예정)
 - **쿼리 키 팩토리**: `src/features/terms/api/terms.ts`의 `termKeys`(all/lists/list/details/detail)
 - **데이터 계층 기반**: `src/lib/apiClient.ts`(`CommonResponse` 언래핑 + `ProblemDetail` → `ApiError`),
   `src/lib/errorMessages.ts`, `src/lib/queryClient.ts`(4xx 재시도 안 함), `src/lib/isApiError.ts`,
-  `src/mocks/mockApi.ts`(`delay`/`delayError`), `src/hooks/useDebounce.ts`
+  `src/mocks/mockApi.ts`(`delay`/`delayError`), `src/hooks/useDebounce.ts`(Task 006에서 실사용 시작)
 - **Notion dev 프록시**: `vite.config.ts`의 `/notion-proxy`가 `loadEnv`로 읽은 `NOTION_API_KEY`와
   `Notion-Version: 2026-03-11`을 주입하고, data source query(POST)와 block children(GET)만
   화이트리스트로 허용
 - **환경변수 템플릿**: `.env.example`에 `VITE_API_BASE_URL`, `NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID`
-- **실행 검증 완료(직전 로드맵 작성 시점)**: `npm run dev` 후 `/`, `/terms/meta-prompt`,
-  `/no-such-page` 모두 콘솔 에러 0건으로 렌더링되며, 390px 폭에서 사이드바가 숨고 "메뉴 열기"
-  버튼이 노출되는 것까지 Playwright로 확인
+- **실행 검증 완료**: `npm run dev` 후 `/` 접속 시 공개 용어 8건이 카드로 렌더링되고(비공개 RAG
+  제외), 카드 클릭 시 `/terms/:slug`로 이동하며, 키워드/카테고리/난이도/태그 필터와 "필터 초기화"가
+  정상 동작함을 Playwright로 확인(콘솔 에러 0건). `npm run lint`/`build` 무오류 통과
 
-**아직 없는 것**: 목 데이터(`src/mocks/db.ts`는 `export {}`만 있음), `fetchTerms`/`fetchTermBySlug`
-구현(TODO 주석 스텁), `src/features/terms/components/`·`hooks/`는 `.gitkeep`만 있는 빈 폴더,
-Notion 블록 렌더러, 실제 검색·필터 동작, 프로덕션용 서버리스 프록시, Notion 데이터베이스 자체.
+**아직 없는 것**: 용어 상세 화면 실 데이터 연결(`useTermDetail`/`TermMetaBadges`/`RelatedTermList`),
+Notion 블록 렌더러, Notion 데이터베이스 자체 및 실제 연동, 프로덕션용 서버리스 프록시.
 
 ---
 
@@ -85,42 +98,61 @@ Notion 블록 렌더러, 실제 검색·필터 동작, 프로덕션용 서버리
   내부만 바뀌고 훅·컴포넌트는 그대로 유지됩니다.
 - **예상 소요 시간**: 4~6일
 - **완료 기준**: 목 데이터를 기반으로 목록·필터·상세 화면이 전부 실제처럼 동작하고(로딩/빈
-  상태/에러 분기 포함), Playwright 검증에서 콘솔 에러 없이 확인된다.
+  상태/에러 분기 포함), Playwright 검증에서 콘솔 에러 없이 확인된다. (목록·필터는 Task 004~006으로
+  충족, 상세 화면은 Task 007에서 마무리 예정)
 
-- **Task 004: 용어 목 데이터 및 조회 함수 스텁 구현** - 우선순위
-  - [ ] `src/mocks/db.ts`에 `Term` 타입을 만족하는 용어 시드 8~10건 작성
-        (메타프롬프트/PRD/MVP 등, 카테고리·난이도·태그가 골고루 섞이도록 구성)
-  - [ ] 시드 데이터에 `relatedPageIds`를 서로 참조하도록 채우고, 맵에 없는 ID(비공개 용어) 케이스도 1건 포함
-  - [ ] 용어 본문용 목 블록 데이터(문단/제목/목록/코드/인용/이미지 각 1건 이상) 작성
-  - [ ] `src/features/terms/api/terms.ts`의 `fetchTerms()`를 `mockApi.delay`로 `Term[]` 반환하도록 구현
-  - [ ] `fetchTermBySlug(slug)`를 구현하고, 없는 슬러그는 `mockApi.delayError('NOT_FOUND', 404)`로 거절
-  - [ ] `pageId → Term` 맵을 만드는 헬퍼(`buildTermMap`)를 같은 파일에 작성해 관련 용어 해석에 재사용
-  - [ ] 실행 검증: dev 서버 기동 → `/` 접속 → React Query Devtools에서 `['terms','list',...]` 쿼리가
-        성공 상태인지 확인, 콘솔 에러 없음 확인
+- **Task 004: 용어 목 데이터 및 조회 함수 스텁 구현** ✅ - 완료
+  - [x] `src/mocks/db.ts`에 `Term` 타입을 만족하는 공개 용어 시드 8건 작성 — `docs/notion-schema.md`
+        §8 샘플 설계(메타프롬프트/PRD/MVP/ADR/헥사고날 아키텍처 등)를 그대로 반영해, 실제 Notion DB
+        구축(Task 009) 이후에도 동일한 데이터로 시나리오를 재검증할 수 있게 함
+  - [x] 시드 데이터의 `relatedPageIds`가 서로 참조하도록 채움. 비공개 용어(RAG)는 목록에는 포함하지
+        않되 메타프롬프트의 관련 용어로만 남겨 "맵에 없는 ID" 케이스를 재현
+  - [x] 용어 본문용 목 블록 데이터 작성 — 메타프롬프트 본문에 문단/H2/H3/글머리목록/번호목록/코드/
+        인용/이미지 8종을 전부 포함한 "블록 샘플러" 구성
+  - [x] `fetchTerms()`를 `mockApi.delay`로 `Term[]` 반환하도록 구현
+  - [x] `fetchTermBySlug(slug)`를 구현, 없는 슬러그는 `mockApi.delayError('NOT_FOUND', 404)`로 거절
+  - [x] `pageId → Term` 맵을 만드는 헬퍼(`buildTermMap`)를 같은 파일에 작성
+  - [x] 실행 검증: 이 시점엔 아직 `useTerms` 훅이 없어 React Query Devtools 대신 브라우저에서
+        `fetchTerms()`/`fetchTermBySlug()`/`buildTermMap()`을 직접 호출해 공개 8건 반환·맵 크기 8·
+        404 거절·관련 용어 맵 미스까지 확인, 콘솔 에러 없음. `npm run lint`/`build` 통과
 
-- **Task 005: 용어 목록 조회 훅 및 카드 컴포넌트 구현**
-  - [ ] `src/features/terms/hooks/useTerms.ts`에 `useQuery(termKeys.list(...))` 기반 목록 조회 훅 작성
-  - [ ] `src/features/terms/components/TermCard.tsx` — 용어명, 한 줄 요약(2줄 말줄임), 카테고리·난이도
-        배지, 태그 목록을 표시하고 카드 전체가 `/terms/:slug`로 이동하는 링크
-  - [ ] `src/features/terms/components/TermCardGrid.tsx` — `sm:grid-cols-2 lg:grid-cols-3` 그리드
-  - [ ] `src/features/terms/components/TermCardSkeleton.tsx` — 로딩 중 스켈레톤 카드
-  - [ ] `HomePage`에서 훅 + 그리드 연결, `isPending`은 스켈레톤, `isError`는 `ErrorState`,
+- **Task 005: 용어 목록 조회 훅 및 카드 컴포넌트 구현** ✅ - 완료
+  - [x] `src/features/terms/hooks/useTerms.ts`에 목록 조회 훅 작성 — **설계 변경**: 원래 가이드대로
+        `useQuery(termKeys.list(params))`를 쓰면 Task 006에서 필터가 바뀔 때마다 쿼리 키가 달라져
+        캐시 미스로 매번 재요청·재로딩이 발생해 PRD 6장의 "클라이언트 사이드 필터" 의도와 어긋난다.
+        그래서 `useTerms()`는 파라미터 없이 `termKeys.lists()` 하나만 키로 쓰고 필터링은 Task 006의
+        순수 함수가 메모리 위에서 처리하도록 변경(사용자 승인 완료). `termKeys.list(params)` 팩토리는
+        향후 서버사이드 필터 대비 그대로 유지
+  - [x] `TermCard.tsx` — 용어명, 한 줄 요약(`line-clamp-2`), 카테고리·난이도 배지, 태그 목록을
+        표시하고 카드 전체가 `/terms/:slug`로 이동하는 링크
+  - [x] `TermCardGrid.tsx` — `children` 기반 그리드(`sm:grid-cols-2 lg:grid-cols-3`). `terms` 배열
+        대신 `children`을 받게 해 카드 그리드와 스켈레톤 그리드가 레이아웃을 공유하도록 함
+  - [x] `TermCardSkeleton.tsx` — `TermCard`와 동일한 `Card` 골격을 공유하는 로딩 스켈레톤
+  - [x] `HomePage`에서 훅 + 그리드 연결, `isPending`은 스켈레톤, `isError`는 `ErrorState`,
         결과 0건은 `EmptyState`로 분기
-  - [ ] 실행 검증: dev 서버 기동 → `/` 접속 → Playwright 스냅샷으로 카드 그리드에 목 데이터 용어명이
-        실제로 렌더링되는지 확인 → 카드 클릭 시 `/terms/:slug`로 이동하는지 확인, 콘솔 에러 없음 확인
+  - [x] 실행 검증: Playwright 스냅샷으로 카드 그리드에 공개 용어 8건(비공개 RAG 제외)이 실제로
+        렌더링되는지 확인 → 카드 클릭 시 `/terms/meta-prompt`로 이동하는지 확인, 콘솔 에러 없음.
+        `npm run lint`/`build` 통과
 
-- **Task 006: 검색·필터 상태 훅 및 필터 컨트롤 구현**
-  - [ ] `src/features/terms/hooks/useTermFilters.ts` — `TermListParams`(keyword/category/difficulty/tag)
-        상태와 setter 제공, 키워드는 `useDebounce`(300ms) 적용
-  - [ ] `src/features/terms/hooks/useFilteredTerms.ts` (또는 순수 함수 `filterTerms`) — 공개 용어 전체에
-        카테고리·난이도·태그·키워드(용어명 + 한 줄 요약, 대소문자 무시)를 클라이언트 사이드로 적용
-  - [ ] 카테고리·태그 옵션 목록은 하드코딩하지 않고 조회된 용어 데이터에서 파생해 생성
-  - [ ] `src/features/terms/components/TermFilterBar.tsx` — `HomePage`의 disabled 플레이스홀더를
+- **Task 006: 검색·필터 상태 훅 및 필터 컨트롤 구현** ✅ - 완료
+  - [x] `src/features/terms/hooks/useTermFilters.ts` — `TermListParams`(keyword/category/difficulty/tag)
+        상태와 setter 제공, 키워드는 기존 `useDebounce`(300ms) 재사용. Input에는 즉시 반영되는 원본
+        keyword를, 실제 필터링에는 디바운스된 `debouncedFilters.keyword`를 따로 반환해 매 keystroke
+        마다 필터링이 재계산되지 않게 함
+  - [x] `src/features/terms/hooks/useFilteredTerms.ts` — 순수 함수 `filterTerms` + 이를 감싸는 얇은
+        훅으로 공개 용어 전체에 카테고리·난이도·태그·키워드(용어명 + 한 줄 요약, 대소문자 무시)를
+        클라이언트 사이드로 적용
+  - [x] 카테고리·태그 옵션 목록은 하드코딩하지 않고 조회된 용어 데이터(필터링 전 원본)에서 파생.
+        난이도는 `TermDifficulty`가 3단계로 고정된 유니온이라 옵션을 하드코딩
+        (`docs/notion-schema.md` §4 불변 계약과 일치)
+  - [x] `src/features/terms/components/TermFilterBar.tsx` — `HomePage`의 disabled 플레이스홀더를
         실제 동작하는 Input + Select 3종으로 교체, "필터 초기화" 동작 포함
-  - [ ] 결과 0건일 때 `EmptyState`에 "검색 결과가 없습니다" 안내 노출
-  - [ ] 실행 검증: dev 서버 기동 → `/` 접속 → `browser_type`으로 키워드 입력 시 카드 수가 줄어드는지,
-        `browser_select_option`으로 카테고리/난이도/태그 선택 시 필터가 적용되는지 스냅샷으로 확인 →
-        결과 없는 키워드 입력 시 빈 상태 문구가 뜨는지 확인, 콘솔 에러 없음 확인
+  - [x] 결과 0건일 때 `EmptyState`에 "검색 결과가 없습니다" 안내 노출 — 원본 자체가 0건인 경우의
+        "등록된 용어가 없습니다"와 문구를 구분
+  - [x] 실행 검증: Playwright로 키워드 입력 시 카드 수 감소(8→1건) 확인, 카테고리 셀렉트("아키텍처")
+        선택 시 필터가 적용되는지 확인(Radix Select라 `browser_select_option` 대신 트리거 클릭 →
+        옵션 클릭으로 조작) → 결과 없는 키워드에서 빈 상태 문구 확인 → "필터 초기화"로 8건 복원
+        확인, 콘솔 에러 없음. `npm run lint`/`build` 통과
 
 - **Task 007: 용어 상세 화면 UI 및 관련 용어 링크 구현**
   - [ ] `src/features/terms/hooks/useTermDetail.ts` — `useQuery(termKeys.detail(slug))` 기반 상세 조회 훅
