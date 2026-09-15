@@ -11,7 +11,7 @@ import { TermFilterBar } from '@/features/terms/components/TermFilterBar'
 
 // 용어 목록 화면 — 조회한 공개 용어를 검색·필터링해 카드 그리드로 보여준다.
 export function HomePage() {
-  const { data: terms, isPending, isError, error } = useTerms()
+  const { data: terms, isPending, isError, error, refetch } = useTerms()
   const {
     filters,
     debouncedFilters,
@@ -63,7 +63,7 @@ export function HomePage() {
         </TermCardGrid>
       )}
 
-      {isError && <ErrorState error={error} />}
+      {isError && <ErrorState error={error} onRetry={() => refetch()} />}
 
       {!isPending && !isError && terms.length === 0 && (
         <EmptyState

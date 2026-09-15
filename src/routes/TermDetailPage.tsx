@@ -32,10 +32,12 @@ function TermDetailSkeleton() {
         <Skeleton className="h-8 w-1/3" />
         <Skeleton className="h-4 w-2/3" />
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Skeleton className="h-5 w-16 rounded-4xl" />
         <Skeleton className="h-5 w-16 rounded-4xl" />
-        <Skeleton className="h-5 w-16 rounded-4xl" />
+        <Skeleton className="h-5 w-14 rounded-4xl" />
+        {/* TermMetaBadges 우측의 "마지막 업데이트 YYYY.MM.DD" 텍스트 자리 */}
+        <Skeleton className="h-4 w-36" />
       </div>
       <Separator />
       <Skeleton className="h-40 w-full" />
@@ -47,7 +49,7 @@ function TermDetailSkeleton() {
 export function TermDetailPage() {
   // 라우트가 `/terms/:slug`로 정의되어 있어 이 컴포넌트가 렌더링되는 시점엔 항상 값이 있다.
   const { slug = '' } = useParams<{ slug: string }>()
-  const { data: term, isPending, isError, error } = useTermDetail(slug)
+  const { data: term, isPending, isError, error, refetch } = useTermDetail(slug)
 
   // 관련 용어(Relation) 해석에 필요한 pageId → Term 맵을 만들기 위해 목록 쿼리를 함께 구독한다.
   // 상세 페이지에 새로고침으로 바로 진입하면 목록 캐시가 비어 있어 관련 용어가 안 보일 수 있는데,
@@ -62,7 +64,7 @@ export function TermDetailPage() {
   if (isError) {
     return (
       <div className="mx-auto w-full max-w-3xl space-y-6">
-        <ErrorState error={error} />
+        <ErrorState error={error} onRetry={() => refetch()} />
         <BackToListLink />
       </div>
     )
