@@ -26,11 +26,19 @@ const DATA_SOURCE_QUERY_PATH = '/v1/data_sources/query'
 const BLOCK_CHILDREN_PATTERN = /^\/v1\/blocks\/[^/]+\/children$/
 
 // 인스턴스가 재사용되는 동안만 유효한 인메모리 캐시(요청 키 → 응답 본문/상태).
-const cache = new Map<string, { body: string; status: number; expiresAt: number }>()
+const cache = new Map<
+  string,
+  { body: string; status: number; expiresAt: number }
+>()
 
 function forbidden(message: string): Response {
   return new Response(
-    JSON.stringify({ object: 'error', status: 403, code: 'forbidden', message }),
+    JSON.stringify({
+      object: 'error',
+      status: 403,
+      code: 'forbidden',
+      message,
+    }),
     { status: 403, headers: { 'Content-Type': 'application/json' } },
   )
 }
@@ -43,20 +51,29 @@ function notionHeaders(extra?: HeadersInit): HeadersInit {
   }
 }
 
-async function fetchNotionWithRetry(url: string, init: RequestInit): Promise<Response> {
+async function fetchNotionWithRetry(
+  url: string,
+  init: RequestInit,
+): Promise<Response> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     const response = await fetch(url, init)
     if (response.status !== 429 || attempt === MAX_RETRIES) {
       return response
     }
     const retryAfterSeconds = Number(response.headers.get('Retry-After') ?? '1')
-    await new Promise((resolve) => setTimeout(resolve, retryAfterSeconds * 1000))
+    await new Promise((resolve) =>
+      setTimeout(resolve, retryAfterSeconds * 1000),
+    )
   }
   // 위 루프가 매 분기에서 반환하므로 실제로는 도달하지 않는다 — TS 흐름 분석용.
   throw new Error('unreachable')
 }
 
-async function proxyWithCache(cacheKey: string, url: string, init: RequestInit): Promise<Response> {
+async function proxyWithCache(
+  cacheKey: string,
+  url: string,
+  init: RequestInit,
+): Promise<Response> {
   const cached = cache.get(cacheKey)
   if (cached && cached.expiresAt > Date.now()) {
     return new Response(cached.body, {
@@ -70,7 +87,11 @@ async function proxyWithCache(cacheKey: string, url: string, init: RequestInit):
 
   // 실패 응답(4xx/5xx)은 캐시하지 않는다 — 일시적 오류가 60초간 고착되면 안 되기 때문이다.
   if (upstream.status === 200) {
-    cache.set(cacheKey, { body: bodyText, status: upstream.status, expiresAt: Date.now() + CACHE_TTL_MS })
+    cache.set(cacheKey, {
+      body: bodyText,
+      status: upstream.status,
+      expiresAt: Date.now() + CACHE_TTL_MS,
+    })
   }
 
   return new Response(bodyText, {
@@ -88,7 +109,11 @@ export default async function handler(request: Request): Promise<Response> {
     return proxyWithCache(
       `query:${requestBody}`,
       `${NOTION_API_BASE}/v1/data_sources/${process.env.NOTION_DATA_SOURCE_ID}/query`,
-      { method: 'POST', headers: notionHeaders({ 'Content-Type': 'application/json' }), body: requestBody },
+      {
+        method: 'POST',
+        headers: notionHeaders({ 'Content-Type': 'application/json' }),
+        body: requestBody,
+      },
     )
   }
 
@@ -99,7 +124,10 @@ export default async function handler(request: Request): Promise<Response> {
       `${NOTION_API_BASE}${path}${search ? `?${search}` : ''}`,
       { method: 'GET', headers: notionHeaders() },
     )
-    response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=30')
+    response.headers.set(
+      'Cache-Control',
+      's-maxage=60, stale-while-revalidate=30',
+    )
     return response
   }
 

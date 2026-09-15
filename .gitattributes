@@ -1,0 +1,4 @@
+# 텍스트 파일의 줄바꿈을 저장소 내에서 LF로 통일한다.
+# core.autocrlf=true인 Windows 환경에서 작업 트리가 CRLF로 체크아웃되며 발생하는
+# Prettier(npm run format:check) 오탐(파일 내용은 동일한데 줄바꿈 차이만으로 전부 불일치 처리되는 문제)을 막는다.
+* text=auto eol=lf

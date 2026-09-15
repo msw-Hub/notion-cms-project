@@ -6,8 +6,10 @@ export function filterTerms(terms: Term[], params: TermListParams): Term[] {
   const keyword = params.keyword.trim().toLowerCase()
 
   return terms.filter((term) => {
-    if (params.category !== 'all' && term.category !== params.category) return false
-    if (params.difficulty !== 'all' && term.difficulty !== params.difficulty) return false
+    if (params.category !== 'all' && term.category !== params.category)
+      return false
+    if (params.difficulty !== 'all' && term.difficulty !== params.difficulty)
+      return false
     if (params.tag !== 'all' && !term.tags.includes(params.tag)) return false
     if (
       keyword &&
@@ -21,6 +23,9 @@ export function filterTerms(terms: Term[], params: TermListParams): Term[] {
 }
 
 // React Compiler가 자동으로 메모이제이션하므로 useMemo 없이 filterTerms를 그대로 호출한다.
-export function useFilteredTerms(terms: Term[], params: TermListParams): Term[] {
+export function useFilteredTerms(
+  terms: Term[],
+  params: TermListParams,
+): Term[] {
   return filterTerms(terms, params)
 }

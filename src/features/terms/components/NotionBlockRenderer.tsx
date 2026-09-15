@@ -1,5 +1,9 @@
 import { Fragment, type ReactNode } from 'react'
-import type { BulletedListItemBlock, NumberedListItemBlock, TermBlock } from '../types'
+import type {
+  BulletedListItemBlock,
+  NumberedListItemBlock,
+  TermBlock,
+} from '../types'
 import { NotionRichText } from './NotionRichText'
 
 interface NotionBlockRendererProps {
@@ -10,13 +14,19 @@ interface NotionBlockRendererProps {
 // Notion API는 목록 항목을 각각 독립된 블록으로 내려주므로(그룹 개념이 없음),
 // 렌더링 직전에 같은 타입이 연속되는 구간을 찾아 하나의 그룹으로 합친다.
 type RenderGroup =
-  | { kind: 'list'; tag: 'ul' | 'ol'; items: Array<BulletedListItemBlock | NumberedListItemBlock> }
+  | {
+      kind: 'list'
+      tag: 'ul' | 'ol'
+      items: Array<BulletedListItemBlock | NumberedListItemBlock>
+    }
   | { kind: 'single'; block: TermBlock }
 
 function isListItemBlock(
   block: TermBlock,
 ): block is BulletedListItemBlock | NumberedListItemBlock {
-  return block.type === 'bulleted_list_item' || block.type === 'numbered_list_item'
+  return (
+    block.type === 'bulleted_list_item' || block.type === 'numbered_list_item'
+  )
 }
 
 function groupBlocks(blocks: TermBlock[]): RenderGroup[] {
@@ -49,7 +59,11 @@ export function NotionBlockRenderer({ blocks }: NotionBlockRendererProps) {
     <div className="space-y-4">
       {groups.map((group) =>
         group.kind === 'list' ? (
-          <ListGroup key={group.items[0].id} tag={group.tag} items={group.items} />
+          <ListGroup
+            key={group.items[0].id}
+            tag={group.tag}
+            items={group.items}
+          />
         ) : (
           <SingleBlock key={group.block.id} block={group.block} />
         ),
@@ -66,7 +80,13 @@ interface ListGroupProps {
 // 연속된 bulleted_list_item/numbered_list_item을 하나의 <ul>/<ol>로 묶어 렌더링한다.
 function ListGroup({ tag: Tag, items }: ListGroupProps) {
   return (
-    <Tag className={Tag === 'ul' ? 'list-disc space-y-1 pl-6' : 'list-decimal space-y-1 pl-6'}>
+    <Tag
+      className={
+        Tag === 'ul'
+          ? 'list-disc space-y-1 pl-6'
+          : 'list-decimal space-y-1 pl-6'
+      }
+    >
       {items.map((item) => {
         const richText =
           item.type === 'bulleted_list_item'
@@ -152,7 +172,9 @@ function SingleBlock({ block }: SingleBlockProps) {
 
     case 'image': {
       // 캡션이 있으면 캡션을 alt로 우선 사용하고, 없으면 대체 텍스트로 접근성을 확보한다.
-      const captionText = block.image.caption.map((run) => run.plain_text).join('')
+      const captionText = block.image.caption
+        .map((run) => run.plain_text)
+        .join('')
       return (
         <figure className="space-y-2">
           <img
@@ -173,7 +195,9 @@ function SingleBlock({ block }: SingleBlockProps) {
       // PRD가 지원 대상으로 정한 7종 밖의 블록 타입(toggle, divider 등)이 실제 Notion
       // 응답에 섞여 와도 앱을 깨뜨리지 않고 조용히 건너뛴다. 개발 중에만 놓친 타입을 알아채도록 경고한다.
       if (import.meta.env.DEV) {
-        console.warn(`지원하지 않는 Notion 블록 타입입니다: ${(block as { type: string }).type}`)
+        console.warn(
+          `지원하지 않는 Notion 블록 타입입니다: ${(block as { type: string }).type}`,
+        )
       }
       return null
   }
@@ -186,7 +210,8 @@ interface BlockWithChildrenProps {
 
 // has_children인 블록의 자식을 들여쓰기로 표현해 원본 페이지의 중첩 구조를 그대로 반영한다.
 function BlockWithChildren({ block, children }: BlockWithChildrenProps) {
-  const hasNestedContent = block.has_children && block.children && block.children.length > 0
+  const hasNestedContent =
+    block.has_children && block.children && block.children.length > 0
 
   return (
     <Fragment>

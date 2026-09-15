@@ -27,8 +27,12 @@ export function HomePage() {
 
   // 카테고리·태그 옵션은 필터링 전 원본 목록에서 파생한다 — 그래야 카테고리를 고른 뒤에도
   // 태그 드롭다운 선택지가 줄어드는 혼란이 없다.
-  const categoryOptions = terms ? [...new Set(terms.map((term) => term.category))] : []
-  const tagOptions = terms ? [...new Set(terms.flatMap((term) => term.tags))] : []
+  const categoryOptions = terms
+    ? [...new Set(terms.map((term) => term.category))]
+    : []
+  const tagOptions = terms
+    ? [...new Set(terms.flatMap((term) => term.tags))]
+    : []
 
   return (
     // 카드 그리드가 와이드 화면에서 3열 폭 이상으로 무한정 늘어나 오른쪽에 빈 여백만
@@ -72,12 +76,15 @@ export function HomePage() {
         />
       )}
 
-      {!isPending && !isError && terms.length > 0 && filteredTerms.length === 0 && (
-        <EmptyState
-          title="검색 결과가 없습니다"
-          description="다른 키워드나 필터로 다시 시도해보세요."
-        />
-      )}
+      {!isPending &&
+        !isError &&
+        terms.length > 0 &&
+        filteredTerms.length === 0 && (
+          <EmptyState
+            title="검색 결과가 없습니다"
+            description="다른 키워드나 필터로 다시 시도해보세요."
+          />
+        )}
 
       {!isPending && !isError && filteredTerms.length > 0 && (
         <TermCardGrid>

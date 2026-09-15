@@ -9,13 +9,17 @@ import type { TermListParams } from '../types'
 export function useTermFilters() {
   const [keyword, setKeyword] = useState('')
   const [category, setCategory] = useState<TermListParams['category']>('all')
-  const [difficulty, setDifficulty] = useState<TermListParams['difficulty']>('all')
+  const [difficulty, setDifficulty] =
+    useState<TermListParams['difficulty']>('all')
   const [tag, setTag] = useState<TermListParams['tag']>('all')
 
   const debouncedKeyword = useDebounce(keyword, 300)
 
   const filters: TermListParams = { keyword, category, difficulty, tag }
-  const debouncedFilters: TermListParams = { ...filters, keyword: debouncedKeyword }
+  const debouncedFilters: TermListParams = {
+    ...filters,
+    keyword: debouncedKeyword,
+  }
 
   function reset() {
     setKeyword('')

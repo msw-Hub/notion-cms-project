@@ -168,7 +168,9 @@ export function mapNotionPageToTerm(page: NotionPage): Term | null {
     tags: page.properties.Tags?.multi_select.map((option) => option.name) ?? [],
     updatedAt: page.properties['Updated At']?.last_edited_time ?? '',
     relatedPageIds:
-      page.properties['Related Terms']?.relation.map((relation) => relation.id) ?? [],
+      page.properties['Related Terms']?.relation.map(
+        (relation) => relation.id,
+      ) ?? [],
   }
 }
 
@@ -216,7 +218,9 @@ export function mapNotionBlockToTermBlock(
 ): TermBlock | null {
   if (!SUPPORTED_BLOCK_TYPES.has(block.type)) {
     if (import.meta.env.DEV) {
-      console.warn(`[notionMapper] 지원하지 않는 블록 타입("${block.type}")을 건너뜁니다.`)
+      console.warn(
+        `[notionMapper] 지원하지 않는 블록 타입("${block.type}")을 건너뜁니다.`,
+      )
     }
     return null
   }
@@ -259,7 +263,9 @@ export function mapNotionBlockToTermBlock(
   } as TermBlock
 }
 
-export function mapNotionBlockListToTermBlocks(blocks: NotionBlock[]): TermBlock[] {
+export function mapNotionBlockListToTermBlocks(
+  blocks: NotionBlock[],
+): TermBlock[] {
   return blocks
     .map((block) => mapNotionBlockToTermBlock(block))
     .filter((block): block is TermBlock => block !== null)

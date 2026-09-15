@@ -36,11 +36,14 @@ export async function fetchTerms(): Promise<Term[]> {
   let cursor: string | undefined
 
   do {
-    const response = await notion.post<NotionQueryResponse>('/v1/data_sources/query', {
-      filter: { property: 'Published', checkbox: { equals: true } },
-      page_size: 100,
-      start_cursor: cursor,
-    })
+    const response = await notion.post<NotionQueryResponse>(
+      '/v1/data_sources/query',
+      {
+        filter: { property: 'Published', checkbox: { equals: true } },
+        page_size: 100,
+        start_cursor: cursor,
+      },
+    )
     pages.push(...response.results)
     cursor = response.has_more ? (response.next_cursor ?? undefined) : undefined
   } while (cursor)
@@ -57,7 +60,11 @@ interface NotionBlockListResponse {
 }
 
 function notFoundError(): ApiError {
-  return { status: 404, errorCode: 'NOT_FOUND', message: getErrorMessage('NOT_FOUND') }
+  return {
+    status: 404,
+    errorCode: 'NOT_FOUND',
+    message: getErrorMessage('NOT_FOUND'),
+  }
 }
 
 // 무한 재귀(순환 참조 등 비정상 응답)를 막기 위한 자식 블록 조회 깊이 상한.
@@ -67,7 +74,10 @@ const MAX_BLOCK_DEPTH = 5
 // 블록 하나의 자식 목록을 100건 단위 커서 순회로 전량 수집하고, has_children인 자식은
 // 깊이 상한 안에서 재귀적으로 조회·매핑한다. 상한을 넘어서면 그 밑의 자식은 생략한다
 // (조용히 잘라내는 편이 상세 페이지 전체가 깨지는 것보다 낫다).
-async function fetchBlockChildren(blockId: string, depth = 0): Promise<TermBlock[]> {
+async function fetchBlockChildren(
+  blockId: string,
+  depth = 0,
+): Promise<TermBlock[]> {
   const rawBlocks: NotionBlock[] = []
   let cursor: string | undefined
 
@@ -104,15 +114,18 @@ async function fetchBlockChildren(blockId: string, depth = 0): Promise<TermBlock
 // Published·Slug 복합 필터로 공개 용어 중 슬러그가 일치하는 1건만 조회하고,
 // 없으면(비공개이거나 존재하지 않는 슬러그) 404 ApiError로 통일해 거절한다.
 export async function fetchTermBySlug(slug: string): Promise<TermDetail> {
-  const response = await notion.post<NotionQueryResponse>('/v1/data_sources/query', {
-    filter: {
-      and: [
-        { property: 'Published', checkbox: { equals: true } },
-        { property: 'Slug', rich_text: { equals: slug } },
-      ],
+  const response = await notion.post<NotionQueryResponse>(
+    '/v1/data_sources/query',
+    {
+      filter: {
+        and: [
+          { property: 'Published', checkbox: { equals: true } },
+          { property: 'Slug', rich_text: { equals: slug } },
+        ],
+      },
+      page_size: 1,
     },
-    page_size: 1,
-  })
+  )
 
   const page = response.results[0]
   if (!page) {

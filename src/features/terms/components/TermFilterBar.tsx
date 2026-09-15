@@ -53,7 +53,11 @@ export function TermFilterBar({
         disabled={disabled}
       />
 
-      <Select value={category} onValueChange={onCategoryChange} disabled={disabled}>
+      <Select
+        value={category}
+        onValueChange={onCategoryChange}
+        disabled={disabled}
+      >
         <SelectTrigger className="w-40">
           <SelectValue placeholder="카테고리" />
         </SelectTrigger>
@@ -69,7 +73,9 @@ export function TermFilterBar({
 
       <Select
         value={difficulty}
-        onValueChange={(value) => onDifficultyChange(value as TermDifficulty | 'all')}
+        onValueChange={(value) =>
+          onDifficultyChange(value as TermDifficulty | 'all')
+        }
         disabled={disabled}
       >
         <SelectTrigger className="w-32">

@@ -32,7 +32,10 @@ notionClient.interceptors.response.use(
     // dev 프록시는 화이트리스트 위반 시 연결을 끊는다(proxyReq.destroy()) — 이 경우
     // error.response 자체가 없는 상태 코드 없는 네트워크 오류로 온다(ROADMAP 리스크 항목).
     const status = error.response?.status ?? 0
-    const errorCode = mapNotionErrorToErrorCode(status, error.response?.data?.code)
+    const errorCode = mapNotionErrorToErrorCode(
+      status,
+      error.response?.data?.code,
+    )
 
     const apiError: ApiError = {
       status,
@@ -44,7 +47,10 @@ notionClient.interceptors.response.use(
 )
 
 // Notion 고유 에러 코드/상태를 errorMessages.ts가 아는 앱 공통 errorCode로 정규화한다.
-function mapNotionErrorToErrorCode(status: number, notionCode: string | undefined): string {
+function mapNotionErrorToErrorCode(
+  status: number,
+  notionCode: string | undefined,
+): string {
   if (status === 0) return 'NETWORK_ERROR'
   if (status === 429) return 'TOO_MANY_REQUESTS'
   if (status >= 500) return 'INTERNAL_SERVER_ERROR'
