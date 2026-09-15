@@ -9,6 +9,7 @@ import { useTermDetail } from '@/features/terms/hooks/useTermDetail'
 import { useTerms } from '@/features/terms/hooks/useTerms'
 import { TermMetaBadges } from '@/features/terms/components/TermMetaBadges'
 import { RelatedTermList } from '@/features/terms/components/RelatedTermList'
+import { NotionBlockRenderer } from '@/features/terms/components/NotionBlockRenderer'
 
 // 목록으로 돌아가는 링크. 정상/에러 화면 양쪽에서 공유한다.
 function BackToListLink() {
@@ -77,10 +78,8 @@ export function TermDetailPage() {
 
       <Separator />
 
-      {/* Notion 본문 블록(문단/제목/목록/코드/인용/이미지) 렌더링 — Task 008에서 실제 렌더러 연결 예정 */}
-      <div className="min-h-40 rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-        본문 블록 렌더링 영역
-      </div>
+      {/* Notion 본문 블록(문단/제목/목록/코드/인용/이미지) 렌더링 */}
+      <NotionBlockRenderer blocks={term.blocks} />
 
       <Separator />
 
