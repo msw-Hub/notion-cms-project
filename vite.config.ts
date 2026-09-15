@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
   // 않고 토큰도 브라우저에 노출할 수 없으므로, 클라이언트가 직접 api.notion.com을 호출하는 방식은
   // 애초에 불가능하다. 이 프록시는 `vite dev`/`vite preview` 로컬 실행 전용이며 실제 배포에는
   // 적용되지 않는다 — 프로덕션은 별도 서버리스 프록시가 필요하다(PRD 3장, 실제 구현은
-  // api/notion-proxy/[...path].ts의 Vercel Edge Function). 그쪽도 재시도/캐시 로직을 직접
+  // api/notion-proxy.ts의 Vercel Edge Function). 그쪽도 재시도/캐시 로직을 직접
   // 제어하기 위해 SDK 대신 표준 fetch를 쓰므로 @notionhq/client는 최종적으로 쓰지 않아
   // 의존성에서 제거했다(Task 016). 아래는 단순 헤더 주입 + 화이트리스트 검사만 수행한다.
   const notionProxy: Record<string, import('vite').ProxyOptions> = {

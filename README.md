@@ -48,11 +48,13 @@ Notion 데이터를 불러옵니다.
 ## 배포 (Vercel)
 
 1. 이 저장소를 Vercel 프로젝트로 연결한다(프레임워크는 Vite로 자동 인식됨).
-2. Vercel 프로젝트 **Settings → Environment Variables**에 아래 "환경 변수" 표의 `NOTION_API_KEY`,
-   `NOTION_DATA_SOURCE_ID`를 등록한다 (`VITE_` 접두사를 붙이지 않는다 — 붙이면 토큰이 클라이언트
-   번들에 노출된다).
-3. 배포하면 `vercel.json`의 rewrite 설정에 따라 `/notion-proxy/**` 요청이 `api/notion-proxy/[...path].ts`
-   (Vercel Edge Function)로 연결되어, dev 프록시와 동일한 화이트리스트·헤더 주입 규칙으로 동작한다.
+2. Vercel 프로젝트 **Settings → Environments**에서 **Production** 환경으로 들어가 아래 "환경 변수"
+   표의 `NOTION_API_KEY`, `NOTION_DATA_SOURCE_ID`를 등록한다 (`VITE_` 접두사를 붙이지 않는다 —
+   붙이면 토큰이 클라이언트 번들에 노출된다). 환경변수는 등록 시점 이후의 배포에만 적용되므로,
+   이미 만들어진 배포가 있다면 등록 후 재배포해야 한다.
+3. 배포하면 `vercel.json`의 rewrite 설정에 따라 `/notion-proxy/**` 요청이 `api/notion-proxy.ts`
+   (Vercel Edge Function, 쿼리 파라미터 `path`로 실제 하위 경로를 전달받는다)로 연결되어, dev
+   프록시와 동일한 화이트리스트·헤더 주입 규칙으로 동작한다.
 
 ## 명령어
 

@@ -3,7 +3,14 @@
 // dev 프록시(vite.config.ts)와 동일하게 화이트리스트 2개 엔드포인트만 통과시키고, 실제
 // Notion 토큰/버전 헤더는 여기(서버)에서만 주입한다. 프런트엔드(src/features/terms/api/
 // notionClient.ts)는 dev/프로덕션 구분 없이 `/notion-proxy/**`라는 동일한 경로만 알면 되고,
-// vercel.json의 rewrite가 이 경로를 `/api/notion-proxy/**`로 연결해 이 함수까지 도달시킨다.
+// vercel.json의 rewrite가 이 요청을 이 고정 함수로 연결한다.
+//
+// 파일명에 대괄호 catch-all(`[...path].ts`)을 쓰지 않는 이유: 실제 배포에서 확인해 보니
+// Next.js가 아닌 일반 Vercel Functions는 이 프로젝트의 배포 환경에서 캐치올 경로가 세그먼트
+// 1개일 때만 매칭되고 2개 이상(`/v1/data_sources/query` 등)이면 함수 자체에 닿기 전에 플랫폼이
+// 404를 내는 현상이 재현됐다. 그래서 함수 파일 경로는 고정(`/api/notion-proxy`)으로 두고,
+// 실제 하위 경로는 vercel.json의 rewrite가 쿼리 파라미터(`path`)로 실어 보내며, 이 함수는
+// req.url의 pathname이 아니라 그 쿼리 파라미터로 라우팅을 판단한다.
 //
 // dev 프록시와 다른 점(프로덕션에 필요한 보강, PRD 3장/7장 5단계):
 // - 화이트리스트 위반 시 연결을 끊는 대신(dev의 proxyReq.destroy()는 상태 코드 없는 네트워크
@@ -102,7 +109,10 @@ async function proxyWithCache(
 
 export default async function handler(request: Request): Promise<Response> {
   const url = new URL(request.url)
-  const path = url.pathname.replace(/^\/api\/notion-proxy/, '')
+  // 실제 하위 경로는 pathname이 아니라 vercel.json rewrite가 실어 보낸 `path` 쿼리 파라미터에 있다.
+  const path = `/${url.searchParams.get('path') ?? ''}`
+  // Notion으로 그대로 전달할 나머지 쿼리(page_size, start_cursor 등)만 남기고 라우팅용 path는 제거한다.
+  url.searchParams.delete('path')
 
   if (request.method === 'POST' && path === DATA_SOURCE_QUERY_PATH) {
     const requestBody = await request.text()
