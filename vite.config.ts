@@ -34,15 +34,27 @@ export default defineConfig(({ mode }) => {
         '/notion-proxy': {
           target: 'https://api.notion.com',
           changeOrigin: true,
-          rewrite: (requestPath) => requestPath.replace(/^\/notion-proxy/, ''),
+          // NOTION_DATA_SOURCE_ID는 VITE_ 접두사가 없어 클라이언트 번들에 노출되지 않는다
+          // (CLAUDE.md 규약) — 즉 프런트엔드 코드는 이 ID를 아예 알 수 없다. 그래서 클라이언트는
+          // ID 없는 고정 경로(`/notion-proxy/v1/data_sources/query`)만 호출하고, 이 dev 프록시가
+          // (Node 컨텍스트에서 loadEnv로 읽은) 실제 ID를 여기서 채워 넣어 진짜 Notion 엔드포인트로
+          // 바꿔준다. 블록 children 조회는 페이지/블록 ID가 비밀값이 아니므로 그대로 통과시킨다.
+          rewrite: (requestPath) => {
+            if (requestPath === '/notion-proxy/v1/data_sources/query') {
+              return `/v1/data_sources/${env.NOTION_DATA_SOURCE_ID}/query`
+            }
+            return requestPath.replace(/^\/notion-proxy/, '')
+          },
           configure: (proxy) => {
             proxy.on('proxyReq', (proxyReq, req) => {
               const url = req.url ?? ''
               // 화이트리스트: PRD가 허용한 두 엔드포인트만 통과시킨다.
               // (a) 지정된 data source 조회, (b) 블록 children 조회.
+              // rewrite가 이미 실제 데이터소스 ID로 치환한 뒤이므로, 여기서는 치환된 경로가
+              // 정확히 그 형태인지만 다시 한번 확인한다(방어적 이중 검사).
               const isDataSourceQuery =
                 req.method === 'POST' &&
-                /^\/v1\/data_sources\/[^/]+\/query$/.test(url)
+                url === `/v1/data_sources/${env.NOTION_DATA_SOURCE_ID}/query`
               const isBlockChildren =
                 req.method === 'GET' &&
                 /^\/v1\/blocks\/[^/]+\/children(\?.*)?$/.test(url)

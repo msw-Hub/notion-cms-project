@@ -7,6 +7,10 @@ const ERROR_MESSAGES: Record<string, string> = {
   FORBIDDEN: '접근 권한이 없습니다.',
   INTERNAL_SERVER_ERROR:
     '서버에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+  // Notion 프록시 호출(Task 011/012)에서 정규화되는 에러코드.
+  TOO_MANY_REQUESTS: '요청이 많아 잠시 지연되고 있습니다. 잠시 후 다시 시도해주세요.',
+  NETWORK_ERROR:
+    '서버에 연결할 수 없습니다. 네트워크 상태를 확인한 뒤 다시 시도해주세요.',
 }
 
 const DEFAULT_ERROR_MESSAGE = '알 수 없는 오류가 발생했습니다.'
