@@ -31,7 +31,9 @@ export function HomePage() {
   const tagOptions = terms ? [...new Set(terms.flatMap((term) => term.tags))] : []
 
   return (
-    <div className="space-y-6">
+    // 카드 그리드가 와이드 화면에서 3열 폭 이상으로 무한정 늘어나 오른쪽에 빈 여백만
+    // 남는 것을 막기 위해 목록 화면 전체를 적당한 max-width로 중앙 정렬한다.
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       <PageHeader
         title="용어 목록"
         description="개발 용어와 개념을 검색하고 필터링해 찾아보세요."
