@@ -8,6 +8,7 @@ import { TermCard } from '@/features/terms/components/TermCard'
 import { TermCardGrid } from '@/features/terms/components/TermCardGrid'
 import { TermCardSkeleton } from '@/features/terms/components/TermCardSkeleton'
 import { TermFilterBar } from '@/features/terms/components/TermFilterBar'
+import { NotionDatabaseLink } from '@/features/terms/components/NotionDatabaseLink'
 
 // 용어 목록 화면 — 조회한 공개 용어를 검색·필터링해 카드 그리드로 보여준다.
 export function HomePage() {
@@ -41,6 +42,8 @@ export function HomePage() {
       <PageHeader
         title="용어 목록"
         description="개발 용어와 개념을 검색하고 필터링해 찾아보세요."
+        // 외부 링크(새 탭)라 목록 조회의 로딩/에러 상태와 무관하게 항상 노출한다
+        actions={<NotionDatabaseLink />}
       />
 
       <TermFilterBar
